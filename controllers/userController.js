@@ -61,11 +61,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
   const accessToken = generateAccessToken(res, user.id);
   const refreshToken = generateRefreshToken(res, user.id);
   user.refreshToken = refreshToken;
-  await user.save().catch(() => {
-    throw new Error(
-      "Something went wrong while generating referesh and access token"
-    );
-  }); // Save refresh token in db
+  await user.save(); // Save refresh token in db
 
   // Response data
   res.status(200).json({
