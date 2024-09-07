@@ -1,4 +1,5 @@
 import express from "express";
+import connectDB from "./db/connectDB.js";
 
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -7,6 +8,12 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-app.listen(PORT, () => {
-  console.log(`Server is running at port: ${PORT}`);
-});
+connectDB()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running at port: ${PORT}`);
+    });
+  })
+  .catch((error) => {
+    console.log(error);
+  });
