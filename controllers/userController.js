@@ -74,6 +74,22 @@ const loginUser = asyncHandler(async (req, res, next) => {
   });
 });
 
+const logoutUser = asyncHandler(async (req, res) => {
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $unset: {
+        refreshToken: 1, // this removes the field from document
+      },
+    },
+    {
+      new: true,
+    }
+  );
+
+  return res.status(200).json({ message: "User logged Out" });
+});
+
 const refreshAccessToken = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
 
@@ -110,4 +126,4 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   });
 });
 
-export { registerUser, loginUser, refreshAccessToken };
+export { registerUser, loginUser, logoutUser, refreshAccessToken };
