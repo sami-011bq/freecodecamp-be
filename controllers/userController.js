@@ -62,7 +62,7 @@ const loginUser = asyncHandler(async (req, res, next) => {
   const accessToken = generateAccessToken(res, user.id);
   const refreshToken = generateRefreshToken(res, user.id);
   user.refreshToken = refreshToken;
-  await user.save(); // Save refresh token in db
+  await user.save({ validateBeforeSave: false }); // Save refresh token in db
 
   // Response data
   res.status(200).json({
