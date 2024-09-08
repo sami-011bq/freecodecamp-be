@@ -1,13 +1,21 @@
 import express from "express";
-import connectDB from "./db/connectDB.js";
+import cookieParser from "cookie-parser";
+import cors from "cors";
 
+import connectDB from "./db/connectDB.js";
 import userRoutes from "./routes/userRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
-import cookieParser from "cookie-parser";
 
 const PORT = process.env.PORT || 8000;
 const app = express();
+
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true,
+  })
+);
 
 // Body parser middleware
 app.use(express.json());
