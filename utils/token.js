@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const ACCESS_TOKEN_EXPIRTY_TIME = 15 * 60; // 900 seconds (15 minutes)
+const ACCESS_TOKEN_EXPIRTY_TIME = 60 * 60; // 3600 seconds (1 hour)
 const REFRESH_TOKEN_EXPIRTY_TIME = 7 * 24 * 60 * 60; // 604,800 seconds (7 days)
 
 const generateAccessToken = (res, userId) => {
@@ -8,15 +8,10 @@ const generateAccessToken = (res, userId) => {
     expiresIn: ACCESS_TOKEN_EXPIRTY_TIME,
   });
 
-  // Set cookie
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV !== "development", // Use secure cookies in production
-    sameSite: "strict", // Prevent CSRF attacks
-    maxAge: ACCESS_TOKEN_EXPIRTY_TIME * 1000, // in milliseconds
-  });
-
-  return accessToken;
+  return {
+    accessToken,
+    accessTokenExpiry: ACCESS_TOKEN_EXPIRTY_TIME * 1000, // in milliseconds, will be use by frontend to set cookie expiry time
+  };
 };
 
 const generateRefreshToken = (res, userId) => {
@@ -24,14 +19,10 @@ const generateRefreshToken = (res, userId) => {
     expiresIn: REFRESH_TOKEN_EXPIRTY_TIME,
   });
 
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV !== "development",
-    sameSite: "strict",
-    maxAge: REFRESH_TOKEN_EXPIRTY_TIME * 1000,
-  });
-
-  return refreshToken;
+  return {
+    refreshToken,
+    refreshTokenExpiry: REFRESH_TOKEN_EXPIRTY_TIME * 2000,
+  };
 };
 
 export { generateAccessToken, generateRefreshToken };
