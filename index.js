@@ -4,6 +4,7 @@ import connectDB from "./db/connectDB.js";
 import userRoutes from "./routes/userRoutes.js";
 import courseRoutes from "./routes/courseRoutes.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
+import cookieParser from "cookie-parser";
 
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -11,6 +12,9 @@ const app = express();
 // Body parser middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Cookie parser middleware
+app.use(cookieParser());
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/courses", courseRoutes);
