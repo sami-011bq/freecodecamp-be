@@ -59,8 +59,11 @@ const loginUser = asyncHandler(async (req, res, next) => {
     throw new Error("Invalid password.");
   }
 
-  const accessToken = generateAccessToken(res, user.id);
-  const refreshToken = generateRefreshToken(res, user.id);
+  const { accessToken, accessTokenExpiry } = generateAccessToken(res, user.id);
+  const { refreshToken, refreshTokenExpiry } = generateRefreshToken(
+    res,
+    user.id
+  );
   user.refreshToken = refreshToken;
   await user.save({ validateBeforeSave: false }); // Save refresh token in db
 
@@ -70,6 +73,8 @@ const loginUser = asyncHandler(async (req, res, next) => {
     email: user.email,
     accessToken,
     refreshToken,
+    accessTokenExpiry,
+    refreshTokenExpiry,
     message: "User logged In Successfully",
   });
 });
@@ -119,11 +124,20 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 
   // Generate new access token
-  const accessToken = generateAccessToken(res, user.id);
+  const { accessToken, accessTokenExpiry } = generateAccessToken(res, user.id);
   res.status(200).json({
     message: "Access token refreshed.",
     accessToken,
+    accessTokenExpiry,
   });
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const profile = asyncHandler(async (req, res) => {
+  const user = {
+    name: req.user?.name,
+    email: req.user?.email,
+  };
+  return res.status(200).json({ message: "Success", ...user });
+});
+
+export { registerUser, loginUser, logoutUser, refreshAccessToken, profile };
