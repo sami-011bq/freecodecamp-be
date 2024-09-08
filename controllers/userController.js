@@ -1,4 +1,5 @@
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 import User from "../models/userModel.js";
 import asyncHandler from "../utils/asyncHandler.js";
@@ -73,4 +74,40 @@ const loginUser = asyncHandler(async (req, res, next) => {
   });
 });
 
-export { registerUser, loginUser };
+const refreshAccessToken = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
+
+  // Refresh token doesn't exist
+  if (!refreshToken) {
+    res.status(401);
+    throw new Error("Unauthorized request.");
+  }
+
+  const decodedToken = jwt.verify(
+    refreshToken,
+    process.env.REFRESH_TOKEN_SECRET
+  );
+
+  const user = await User.findById(decodedToken?.userId);
+
+  // Invalid refresh token
+  if (!user) {
+    res.status(401);
+    throw new Error("Invalid refresh token.");
+  }
+
+  // Refresh token doesn't match with user refresh token
+  if (refreshToken !== user?.refreshToken) {
+    res.status(401);
+    throw new Error("Refresh token is expired or used.");
+  }
+
+  // Generate new access token
+  const accessToken = generateAccessToken(res, user.id);
+  res.status(200).json({
+    message: "Access token refreshed.",
+    accessToken,
+  });
+});
+
+export { registerUser, loginUser, refreshAccessToken };
