@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/userModel.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import { generateAccessToken, generateRefreshToken } from "../utils/token.js";
+import generatePassword from "../utils/generatePassword.js";
 
 const registerUser = asyncHandler(async (req, res, next) => {
   const { name, email, password, avatar } = req.body;
@@ -141,9 +142,50 @@ const profile = asyncHandler(async (req, res) => {
 });
 
 const googleLogin = asyncHandler(async (req, res) => {
-  const user = req.user;
-  console.log(user);
-  res.send(200).json({ message: "Success", user: user });
+  const googleUser = req.user?._json;
+  let user = await User.findOne({ email: googleUser?.email });
+
+  const sendResponse = async () => {
+    // Generate access token & refresh token
+    const { accessToken, accessTokenExpiry } = generateAccessToken(
+      res,
+      user.id
+    );
+    const { refreshToken, refreshTokenExpiry } = generateRefreshToken(
+      res,
+      user.id
+    );
+
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false }); // Save refresh token in db
+
+    // Response data
+    res
+      .cookie("accessToken", accessToken, {
+        maxAge: accessTokenExpiry,
+      })
+      .cookie("refreshToken", refreshToken, {
+        maxAge: refreshTokenExpiry,
+      })
+      .redirect(`${process.env.CORS_ORIGIN}/courses`);
+  };
+
+  // If user already exist
+  if (user) {
+    return sendResponse();
+  } else {
+    // user doesn't exist create new one
+    const password = generatePassword(); // random password, so no one can login using google email if it's signed up using OAuth
+    const salt = bcrypt.genSaltSync(10);
+    const hashedPassword = await bcrypt.hash(password, salt); // password hashing
+    user = await User.create({
+      name: googleUser?.name,
+      email: googleUser?.email,
+      avatar: googleUser?.picture,
+      password: hashedPassword,
+    });
+    return sendResponse();
+  }
 });
 
 export {
