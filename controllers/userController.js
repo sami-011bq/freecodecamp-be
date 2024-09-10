@@ -140,4 +140,17 @@ const profile = asyncHandler(async (req, res) => {
   return res.status(200).json({ message: "Success", ...user });
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken, profile };
+const googleLogin = asyncHandler(async (req, res) => {
+  const user = req.user;
+  console.log(user);
+  res.send(200).json({ message: "Success", user: user });
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  profile,
+  googleLogin,
+};
