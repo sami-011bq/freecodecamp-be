@@ -21,7 +21,7 @@ const generateRefreshToken = (res, userId) => {
 
   return {
     refreshToken,
-    refreshTokenExpiry: REFRESH_TOKEN_EXPIRTY_TIME * 2000,
+    refreshTokenExpiry: REFRESH_TOKEN_EXPIRTY_TIME * 1000,
   };
 };
 
