@@ -1,5 +1,5 @@
 import { Router } from "express";
-import passport from "../config/passport.js";
+import passport from "passport";
 import { googleLogin } from "../controllers/userController.js";
 
 const router = Router();
